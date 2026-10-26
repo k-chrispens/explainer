@@ -76,9 +76,10 @@ GFM: paragraphs, lists, tables, `inline code`, **bold** for defined terms, *ital
 - `:::flow wide animate pace=0.5 | Caption`: a box-and-arrow diagram from a DSL (below).
 - `:::sequence animate | Caption`: a sequence diagram from a DSL (below).
 - `:::steps | Title`: a stepper. Panels start with `+++ Step title`; each panel is Markdown and may contain directives. With JS: one panel at a time with Back/Next, animated figures replay on show. Without JS: all panels stacked.
-- `:::raw`: verbatim HTML, including `<script>`. The escape hatch for interactive demos, custom widgets, library-driven visualizations. Scope ids and globals to avoid collisions; match the palette and fonts below.
+- `:::interactive [wide] [height=N] | Caption`: a live figure. The body is HTML with its own `<style>` and `<script>`, run in a sandboxed frame (no network, no access to the page) that sizes itself to its content and follows the page's theme. Use it when trying beats reading: a slider that moves a marker along a timeline, a toggle between two states, a stepper the reader drives. Keep it self-contained and small (under about 80 lines), draw with inline SVG or plain elements, and colour with the palette variables `var(--ink)`, `var(--muted)`, `var(--rule)`, `var(--accent)`, `var(--blue)`, `var(--soft)`, `var(--fill)` so it reads on paper and in a dark host. Numbered and captioned like any figure.
+- `:::raw`: verbatim HTML, including `<script>`. The escape hatch for custom widgets and library-driven visualizations that need the page itself. Scope ids and globals to avoid collisions; match the palette and fonts below.
 
-Figures (`figure`, `flow`, `sequence`) are numbered automatically; captions say what is shown, then the point it makes. `wide` bleeds into the margins. `animate` reveals elements in order when the figure scrolls into view and adds a Replay button; use it for paths, protocols and lifecycles where order is the point, not for static structure.
+Figures (`figure`, `flow`, `sequence`, `interactive`) are numbered automatically; captions say what is shown, then the point it makes. `wide` bleeds into the margins. `animate` reveals elements in order when the figure scrolls into view and adds a Replay button; use it for paths, protocols and lifecycles where order is the point, not for static structure.
 
 ### Flow DSL
 
