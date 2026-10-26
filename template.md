@@ -82,6 +82,19 @@ Superseded records are dropped.
 The batch is uploaded; `uploadedHead` advances.
 :::
 
+:::interactive | A live figure: drag the marker and the store below updates. Everything left of it survived a commit.
+<style>.tl{display:flex;gap:10px;align-items:center}.tl input{flex:1}#store{margin-top:8px;font-size:12.5px;color:var(--muted)}#store b{color:var(--ink)}</style>
+<div class="tl"><span>crash at</span><input id="t" type="range" min="0" max="100" value="60"></div>
+<div id="store"></div>
+<script>
+const commits = [{ t: 10, label: "pi.user" }, { t: 40, label: "pi.assistant" }, { t: 55, label: "read result" }, { t: 80, label: "bash output" }];
+const slider = document.getElementById("t"), store = document.getElementById("store");
+const render = () => { const kept = commits.filter((c) => c.t <= Number(slider.value)); store.innerHTML = `<b>${kept.length} of ${commits.length} commits kept:</b> ${kept.map((c) => c.label).join(", ") || "nothing"}`; };
+slider.addEventListener("input", render);
+render();
+</script>
+:::
+
 | Case | Recovery |
 | --- | --- |
 | L &gt; D | replay the outbox tail |

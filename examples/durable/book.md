@@ -172,6 +172,64 @@ const again = await root.submit({ type: "input", content: "Hello", requestId: "g
 rule is simple: mint the request id when the user presses Send, keep it until the submit is acknowledged, and reuse it
 on every retry.
 
+
+# Try It {#try-it lede="A figure the reader can drive: drag the crash and see what the store keeps."}
+
+Figures do not have to hold still. This one replays Lena's turn as a timeline of commits. Drag the red marker to the moment the laptop dies and read off what the store holds when she comes back: everything left of the marker was committed, everything right of it never happened as far as the store is concerned.
+
+:::interactive wide | Where the crash lands. Each tick is a commit on the Harness line. Drag the marker to the moment the laptop dies: the store afterwards holds exactly the commits to its left, and nothing of what was in flight.
+<style>
+.tl{position:relative;height:118px;margin:4px 0 10px}
+.tl svg{width:100%;height:118px;display:block}
+.row{display:flex;gap:10px;align-items:center;margin:2px 0}
+.row input{flex:1}
+.store{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px 14px;margin-top:10px;font-size:12.5px}
+.store div{display:flex;gap:7px;align-items:center;color:var(--muted)}
+.store div.in{color:var(--ink)}
+.store i{width:9px;height:9px;border-radius:50%;background:var(--rule);flex:none}
+.store div.in i{background:var(--accent)}
+.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+</style>
+<div class="tl"><svg id="tl" viewBox="0 0 720 118"></svg></div>
+<div class="row"><span class="lbl">crash at</span><input id="t" type="range" min="0" max="100" value="66"><b id="when" style="width:9em;text-align:right;font-size:12.5px"></b></div>
+<div class="lbl" style="margin-top:8px">In the store after the restart</div>
+<div class="store" id="store"></div>
+<script>
+const events = [
+  { t: 8, label: "pi.user", detail: "+ generation task", commit: true },
+  { t: 24, label: "model request", detail: "no commit: nothing to record yet", commit: false },
+  { t: 42, label: "pi.assistant", detail: "+ tool tasks read, bash", commit: true },
+  { t: 56, label: "read result", detail: "pi.tool-result", commit: true },
+  { t: 70, label: "bash output", detail: "progress, 100 ms window", commit: true },
+  { t: 84, label: "bash output", detail: "progress, 100 ms window", commit: true },
+  { t: 96, label: "bash result", detail: "would be the next commit", commit: false },
+];
+const svg = document.getElementById("tl"), slider = document.getElementById("t"), store = document.getElementById("store"), when = document.getElementById("when");
+const x = (t) => 30 + (t / 100) * 660;
+function render() {
+  const crash = Number(slider.value);
+  let out = `<line x1="30" y1="60" x2="690" y2="60" stroke="var(--rule)" stroke-width="2"/>`;
+  out += `<text x="30" y="24" font-size="10" fill="var(--muted)" letter-spacing="2">HARNESS LINE</text>`;
+  for (const e of events) {
+    const alive = e.commit && e.t <= crash;
+    const cx = x(e.t);
+    out += e.commit
+      ? `<circle cx="${cx}" cy="60" r="7" fill="${alive ? "var(--accent)" : "var(--fill)"}" stroke="${alive ? "var(--accent)" : "var(--muted)"}" stroke-width="1.5"/>`
+      : `<circle cx="${cx}" cy="60" r="5" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/>`;
+    out += `<text x="${cx}" y="${e.t % 20 < 10 ? 92 : 44}" font-size="10" text-anchor="middle" fill="${alive ? "var(--ink)" : "var(--muted)"}">${e.label}</text>`;
+  }
+  out += `<line x1="${x(crash)}" y1="30" x2="${x(crash)}" y2="104" stroke="#e5484d" stroke-width="2"/><text x="${x(crash)}" y="114" font-size="10" text-anchor="middle" fill="#e5484d" font-weight="600">lid closes</text>`;
+  svg.innerHTML = out;
+  const commits = events.filter((e) => e.commit);
+  const survived = commits.filter((e) => e.t <= crash);
+  when.textContent = `${survived.length} of ${commits.length} commits kept`;
+  store.innerHTML = commits.map((e) => `<div class="${e.t <= crash ? "in" : ""}"><i></i>${e.label} <span style="opacity:.7">${e.detail}</span></div>`).join("");
+}
+slider.addEventListener("input", render);
+render();
+</script>
+:::
+
 # What It Does Not Do {.epilogue lede="The limits the README states, and what a host must handle itself."}
 
 - **A storage error ends the Harness.** The call that hit it rejects, everything after it rejects with

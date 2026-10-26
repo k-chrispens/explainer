@@ -11,7 +11,8 @@ export const TEACHING_RULES = `How to teach:
   paragraphs and at most one card. Plain, direct language.
 - Do your reading silently: never narrate tool use ("let me read the sources"); just read, then teach.
 - Use render for figures: sequence diagrams for protocols and message orders, flows for structure and paths, steppers
-  for multi-step processes. A good figure replaces paragraphs. Do not repeat the figure's content in prose.
+  for multi-step processes, and a live figure (:::interactive) when the learner should try something (drag, toggle,
+  step) rather than read it. A good figure replaces paragraphs. Do not repeat the figure's content in prose.
 - After explaining a concept, ask its check questions one at a time and stop: end your message and wait for the
   learner's answer. Never answer your own question.
 - Grade every answer with grade, then reply: say what was right, correct what was wrong with a short explanation, and
@@ -48,5 +49,10 @@ Cards (render tool) may also use directives: ":::name flags | Caption" ... ":::"
     a -> a: self step
     note a..b: spans actors
     divider "later"
+- :::interactive [height=N] | Caption  -- a live figure: HTML with its own <style> and <script>, run in a sandboxed
+  frame with no network. Use it when trying beats reading: a slider that moves a marker along a timeline, a toggle
+  between two states, a stepper the learner drives. Self-contained and small (under ~80 lines), drawn with inline SVG
+  or plain elements, coloured with var(--ink), var(--muted), var(--rule), var(--accent), var(--blue), var(--soft),
+  var(--fill). No external resources.
 - Captions say what is shown and the point it makes. Use accent for the focus, blue for the contrasting role, muted for
   passive parts, dashed for planned or optional parts.`;

@@ -103,6 +103,7 @@ blockquote{margin:1.4rem 0;padding:.2rem 0 .2rem 1.2rem;border-left:3px solid va
 .fig svg{max-width:100%;height:auto}
 table{max-width:100%}
 @media (max-width:760px){.inner{padding:0 20px}.cover{padding:48px 22px}.cover h1{font-size:3.2rem}.fig.wide{margin-left:0;margin-right:0}table{display:block;overflow-x:auto}.toc ol{columns:1}}
+.fig.interactive iframe{display:block;width:100%;border:1px solid var(--rule);border-radius:4px;background:transparent}
 </style>
 
 
@@ -124,6 +125,7 @@ official documentation. Names and numbers are the README&#39;s.</p>
 <li><a href="#tasks">II. Tasks That Remember</a></li>
 <li><a href="#tools">III. Tools After a Crash</a></li>
 <li><a href="#requests">IV. Asking Twice</a></li>
+<li><a href="#try-it">V. Try It</a></li>
 <li><a href="#what-it-does-not-do">What It Does Not Do</a></li>
 <li><a href="#reference">Appendix A: Reference</a></li>
 <li><a href="#glossary">Appendix B: Glossary</a></li>
@@ -232,6 +234,75 @@ rule is simple: mint the request id when the user presses Send, keep it until th
 on every retry.</p>
 </section>
 
+<section class="chapter" id="try-it"><header class="opener"><div class="numeral">V</div><h2>Try It</h2><p class="lede">A figure the reader can drive: drag the crash and see what the store keeps.</p></header>
+<p class="dropcap">Figures do not have to hold still. This one replays Lena&#39;s turn as a timeline of commits. Drag the red marker to the moment the laptop dies and read off what the store holds when she comes back: everything left of the marker was committed, everything right of it never happened as far as the store is concerned.</p>
+<figure class="fig wide interactive"><iframe sandbox="allow-scripts" data-live="1" title="Where the crash lands. Each tick is a commit on the Harness line. Drag the marker to the moment the laptop dies: the store afterwards holds exactly the commits to its left, and nothing of what was in flight." srcdoc="&lt;!doctype html>&lt;html>&lt;head>&lt;meta charset=&quot;utf-8&quot;>&lt;style>
+:root{--paper:#fbf8f2;--ink:#2a2723;--muted:#7b7468;--rule:#e3dbcc;--accent:#b4472f;--blue:#2e6a8a;--sand:#c2b18c;--soft:#f4eee2;--fill:#fff}
+html.night{--paper:#1b1a18;--ink:#e6e0d4;--muted:#a09a8f;--rule:#34322d;--accent:#e07256;--blue:#7db3d4;--sand:#6e624b;--soft:#242320;--fill:#262523}
+html,body{margin:0;background:transparent;color:var(--ink);font:14px/1.5 'Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+body{padding:12px 14px}
+button,input,select{font:inherit;color:inherit}
+&lt;/style>&lt;/head>&lt;body>
+&lt;style>
+.tl{position:relative;height:118px;margin:4px 0 10px}
+.tl svg{width:100%;height:118px;display:block}
+.row{display:flex;gap:10px;align-items:center;margin:2px 0}
+.row input{flex:1}
+.store{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px 14px;margin-top:10px;font-size:12.5px}
+.store div{display:flex;gap:7px;align-items:center;color:var(--muted)}
+.store div.in{color:var(--ink)}
+.store i{width:9px;height:9px;border-radius:50%;background:var(--rule);flex:none}
+.store div.in i{background:var(--accent)}
+.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+&lt;/style>
+&lt;div class=&quot;tl&quot;>&lt;svg id=&quot;tl&quot; viewBox=&quot;0 0 720 118&quot;>&lt;/svg>&lt;/div>
+&lt;div class=&quot;row&quot;>&lt;span class=&quot;lbl&quot;>crash at&lt;/span>&lt;input id=&quot;t&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; value=&quot;66&quot;>&lt;b id=&quot;when&quot; style=&quot;width:9em;text-align:right;font-size:12.5px&quot;>&lt;/b>&lt;/div>
+&lt;div class=&quot;lbl&quot; style=&quot;margin-top:8px&quot;>In the store after the restart&lt;/div>
+&lt;div class=&quot;store&quot; id=&quot;store&quot;>&lt;/div>
+&lt;script>
+const events = [
+  { t: 8, label: &quot;pi.user&quot;, detail: &quot;+ generation task&quot;, commit: true },
+  { t: 24, label: &quot;model request&quot;, detail: &quot;no commit: nothing to record yet&quot;, commit: false },
+  { t: 42, label: &quot;pi.assistant&quot;, detail: &quot;+ tool tasks read, bash&quot;, commit: true },
+  { t: 56, label: &quot;read result&quot;, detail: &quot;pi.tool-result&quot;, commit: true },
+  { t: 70, label: &quot;bash output&quot;, detail: &quot;progress, 100 ms window&quot;, commit: true },
+  { t: 84, label: &quot;bash output&quot;, detail: &quot;progress, 100 ms window&quot;, commit: true },
+  { t: 96, label: &quot;bash result&quot;, detail: &quot;would be the next commit&quot;, commit: false },
+];
+const svg = document.getElementById(&quot;tl&quot;), slider = document.getElementById(&quot;t&quot;), store = document.getElementById(&quot;store&quot;), when = document.getElementById(&quot;when&quot;);
+const x = (t) => 30 + (t / 100) * 660;
+function render() {
+  const crash = Number(slider.value);
+  let out = `&lt;line x1=&quot;30&quot; y1=&quot;60&quot; x2=&quot;690&quot; y2=&quot;60&quot; stroke=&quot;var(--rule)&quot; stroke-width=&quot;2&quot;/>`;
+  out += `&lt;text x=&quot;30&quot; y=&quot;24&quot; font-size=&quot;10&quot; fill=&quot;var(--muted)&quot; letter-spacing=&quot;2&quot;>HARNESS LINE&lt;/text>`;
+  for (const e of events) {
+    const alive = e.commit &amp;&amp; e.t &lt;= crash;
+    const cx = x(e.t);
+    out += e.commit
+      ? `&lt;circle cx=&quot;${cx}&quot; cy=&quot;60&quot; r=&quot;7&quot; fill=&quot;${alive ? &quot;var(--accent)&quot; : &quot;var(--fill)&quot;}&quot; stroke=&quot;${alive ? &quot;var(--accent)&quot; : &quot;var(--muted)&quot;}&quot; stroke-width=&quot;1.5&quot;/>`
+      : `&lt;circle cx=&quot;${cx}&quot; cy=&quot;60&quot; r=&quot;5&quot; fill=&quot;none&quot; stroke=&quot;var(--muted)&quot; stroke-dasharray=&quot;2 2&quot;/>`;
+    out += `&lt;text x=&quot;${cx}&quot; y=&quot;${e.t % 20 &lt; 10 ? 92 : 44}&quot; font-size=&quot;10&quot; text-anchor=&quot;middle&quot; fill=&quot;${alive ? &quot;var(--ink)&quot; : &quot;var(--muted)&quot;}&quot;>${e.label}&lt;/text>`;
+  }
+  out += `&lt;line x1=&quot;${x(crash)}&quot; y1=&quot;30&quot; x2=&quot;${x(crash)}&quot; y2=&quot;104&quot; stroke=&quot;#e5484d&quot; stroke-width=&quot;2&quot;/>&lt;text x=&quot;${x(crash)}&quot; y=&quot;114&quot; font-size=&quot;10&quot; text-anchor=&quot;middle&quot; fill=&quot;#e5484d&quot; font-weight=&quot;600&quot;>lid closes&lt;/text>`;
+  svg.innerHTML = out;
+  const commits = events.filter((e) => e.commit);
+  const survived = commits.filter((e) => e.t &lt;= crash);
+  when.textContent = `${survived.length} of ${commits.length} commits kept`;
+  store.innerHTML = commits.map((e) => `&lt;div class=&quot;${e.t &lt;= crash ? &quot;in&quot; : &quot;&quot;}&quot;>&lt;i>&lt;/i>${e.label} &lt;span style=&quot;opacity:.7&quot;>${e.detail}&lt;/span>&lt;/div>`).join(&quot;&quot;);
+}
+slider.addEventListener(&quot;input&quot;, render);
+render();
+&lt;/script>
+&lt;script>
+(function(){
+  var post=function(){parent.postMessage({type:&quot;ex-size&quot;,height:document.documentElement.scrollHeight},&quot;*&quot;)};
+  new ResizeObserver(post).observe(document.body);
+  addEventListener(&quot;message&quot;,function(e){if(e.data&amp;&amp;e.data.type===&quot;ex-theme&quot;){document.documentElement.classList.toggle(&quot;night&quot;,e.data.theme===&quot;night&quot;);post()}});
+  parent.postMessage({type:&quot;ex-ready&quot;},&quot;*&quot;);
+})();
+&lt;/script>&lt;/body>&lt;/html>"></iframe><figcaption><span class="fignum">Figure 3.</span> Where the crash lands. Each tick is a commit on the Harness line. Drag the marker to the moment the laptop dies: the store afterwards holds exactly the commits to its left, and nothing of what was in flight.</figcaption></figure>
+</section>
+
 <section class="chapter epilogue" id="what-it-does-not-do"><header class="opener"><div class="numeral">∴</div><h2>What It Does Not Do</h2><p class="lede">The limits the README states, and what a host must handle itself.</p></header>
 <ul>
 <li><strong>A storage error ends the Harness.</strong> The call that hit it rejects, everything after it rejects with
@@ -296,6 +367,23 @@ handed to a conversation. <strong>Task:</strong> a durable state machine with a 
 <p class="colophon">Coming Back · sample edition · 2026-10-21 · based on the pi-durable 1.3.0 README</p>
 </div></div>
 <script>(function activate(root) {
+	// Live figures (:::interactive) run in sandboxed frames that report their height and take the
+	// page's theme; one listener per window serves every frame on the page.
+	const win = root.defaultView ?? root.ownerDocument?.defaultView ?? window;
+	if (!win.__explainerFrames) {
+		win.__explainerFrames = true;
+		const theme = () => (win.document.documentElement.classList.contains("night") || win.document.body?.classList.contains("night") ? "night" : "paper");
+		win.addEventListener("message", (e) => {
+			if (!e.data || typeof e.data !== "object") return;
+			const frame = [...win.document.querySelectorAll("iframe[data-live]")].find((f) => f.contentWindow === e.source);
+			if (!frame) return;
+			if (e.data.type === "ex-ready") frame.contentWindow.postMessage({ type: "ex-theme", theme: theme() }, "*");
+			else if (e.data.type === "ex-size" && !frame.dataset.fixed) frame.style.height = `${Math.max(60, Math.ceil(e.data.height))}px`;
+		});
+		win.explainerTheme = (name) => {
+			for (const f of win.document.querySelectorAll("iframe[data-live]")) f.contentWindow?.postMessage({ type: "ex-theme", theme: name }, "*");
+		};
+	}
 	const replay = (f) => {
 		f.classList.remove("play");
 		void f.getBoundingClientRect();
